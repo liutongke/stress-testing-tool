@@ -1,4 +1,4 @@
-package main
+package src
 
 import (
 	"encoding/json"
@@ -22,42 +22,42 @@ type Request struct {
 	Code      int               //验证的状态码
 }
 
-type RequestResults struct {
+type ResponseRs struct {
 	Time      time.Duration
 	IsSucceed bool
 }
 
-//websocket请求的结构体
-type WsRequest struct {
-	Id   int         `json:"id"`   //消息id
-	Ver  string      `json:"ver"`  //版本号
-	Path string      `json:"path"` // 请求命令字
-	Data interface{} `json:"data"` // 数据 json
-}
+// websocket请求的结构体
+//type WsRequest struct {
+//	Id   int         `json:"id"`   //消息id
+//	Ver  string      `json:"ver"`  //版本号
+//	Path string      `json:"path"` // 请求命令字
+//	Data interface{} `json:"data"` // 数据 json
+//}
 
-//websocket返回的结构体
+// websocket返回的结构体
 type WsResponse struct {
 	Id   int         `json:"id"`   //消息id
 	Err  int         `json:"err"`  // 返回的错误码
 	Msg  string      `json:"msg"`  // 返回的信息
 	Data interface{} `json:"data"` // 返回数据json
 }
+type WsRequest struct {
+	Id   string            `json:"id"`
+	Path string            `json:"path"`
+	Data map[string]string `json:"data"`
+}
 
-//生成websocket请求的数据集合
-func WsRequestData(id int, ver, path string, data map[string]string) string {
-	b, err := json.Marshal(&WsRequest{
-		Id:   id,
-		Ver:  ver,
-		Path: path,
-		Data: data,
-	})
+// 生成websocket请求的数据集合
+func WsRequestData(data *WsRequest) string {
+	b, err := json.Marshal(&data)
 	if err != nil {
-		panic("json Marshal err:" + err.Error())
+		return ""
 	}
 	return string(b)
 }
 
-//json数据转换
+// json数据转换
 func JsonToData(payload string) (*WsResponse, error) {
 	var t = &WsResponse{}
 	err := json.Unmarshal([]byte(payload), t)
