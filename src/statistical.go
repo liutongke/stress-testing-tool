@@ -2,10 +2,16 @@ package src
 
 import (
 	"fmt"
+	"stress-testing-tool/src/tool"
 	"time"
 )
 
-func ReceivingResults(ch <-chan *ResponseRs) {
+var exportStatisticsTime = 1 * time.Second
+
+func ReceivingResults(ch <-chan *tool.ResponseRs) {
+	var stopChan = make(chan bool)
+	startTm := time.Now()
+
 	// 时间
 	var (
 		processingTime time.Duration //处理总时间
@@ -15,12 +21,28 @@ func ReceivingResults(ch <-chan *ResponseRs) {
 		failureNum     uint64        // 处理失败数，code不为0
 		requestNum     int           //已经请求总数量
 	)
+	// 定时输出一次计算结果
+	ticker := time.NewTicker(exportStatisticsTime)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				//endTime := uint64(time.Now().UnixNano())
 
-	startTm := time.Now()
+				qps := float64(successNum*1e9) / float64(tool.DiffNano(startTm))
+				echoHeader(maxTime, minTime, successNum, failureNum, processingTime, 0, qps)
+
+			case <-stopChan:
+				// 处理完成
+				return
+			}
+		}
+	}()
+
 	for data := range ch {
 
 		requestNum = requestNum + 1
-		echoProcess(requestNum)
+		//echoProcess(requestNum)
 
 		processingTime += data.Time
 		if maxTime <= data.Time {
@@ -42,13 +64,18 @@ func ReceivingResults(ch <-chan *ResponseRs) {
 		}
 	}
 
-	runTime := DiffNano(startTm)
+	stopChan <- true
+
+	runTime := tool.DiffNano(startTm)
+	qps := float64(successNum*1e9) / float64(runTime)
 
 	//| 最大请求时长| 最小请求时长 | 成功的处理数 | 失败的请求数 | 处理总时长 | 处理用时 |
 	//|-----------|------------|-------------|------------|----------|---------|
 	//| %s        | %s         | %d          | %d         | %s       | %s      |
 
-	fmt.Printf("|最大请求时长:%s|最小请求时长:%s|成功的处理数:%d|失败的请求数:%d|处理总时长:%s|处理用时:%s|", maxTime, minTime, successNum, failureNum, processingTime, runTime)
+	fmt.Println("-------success-------")
+	echoHeader(maxTime, minTime, successNum, failureNum, processingTime, runTime, qps)
+	fmt.Println("-------end-------")
 	WgTask.Done()
 }
 
@@ -57,4 +84,12 @@ func echoProcess(num int) {
 	if (num % (totalUserNum / 10)) == 0 {
 		fmt.Printf("Completed %d requests\n", num)
 	}
+}
+
+func echoHeader(maxTime, minTime time.Duration, successNum, failureNum uint64, processingTime, runTime time.Duration, qps float64) {
+	//| 最大请求时长| 最小请求时长 | 成功的处理数 | 失败的请求数 | 处理总时长 | 处理用时 |
+	//|-----------|------------|-------------|------------|----------|---------|
+	fmt.Printf("|最大请求时长:%s 最小请求时长:%s 成功的处理数:%d 失败的请求数:%d 处理总时长:%s 处理用时:%s qps:%d|\n", maxTime, minTime, successNum, failureNum, processingTime, runTime, int(qps))
+	fmt.Println("------------------------------------------------------------------------------------------------------------------------------------")
+	return
 }

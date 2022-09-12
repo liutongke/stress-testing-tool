@@ -1,8 +1,9 @@
-package src
+package websocket
 
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"stress-testing-tool/src/tool"
 	"time"
 )
 
@@ -22,13 +23,13 @@ func SendWsMsg() {
 
 }
 
-func pushChan(duration time.Duration, succ bool, ch chan<- *ResponseRs) {
-	ch <- &ResponseRs{
+func pushChan(duration time.Duration, succ bool, ch chan<- *tool.ResponseRs) {
+	ch <- &tool.ResponseRs{
 		Time:      duration,
 		IsSucceed: succ,
 	}
 }
-func WebSocketRequest(conn *websocket.Conn, msg1 string, ch chan<- *ResponseRs) string {
+func WebSocketRequest(conn *websocket.Conn, msg1 string, ch chan<- *tool.ResponseRs) string {
 
 	//fmt.Println("发送的消息:", msg1)
 	var startTime = time.Now()
@@ -66,7 +67,7 @@ func WebSocketRequest(conn *websocket.Conn, msg1 string, ch chan<- *ResponseRs) 
 		//	}
 		//}
 
-		pushChan(DiffNano(startTime), true, ch)
+		pushChan(tool.DiffNano(startTime), true, ch)
 
 		return ""
 		//return string(msg)

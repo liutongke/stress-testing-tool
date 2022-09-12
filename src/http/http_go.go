@@ -2,7 +2,7 @@ package http
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -27,7 +27,7 @@ func PostJosn(url, data string) (string, error) {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,7 @@ func PostJosn(url, data string) (string, error) {
 
 var token string
 
-func PostFormData(url string, data map[string]string) (string, error) {
+func PostFormData(url string, data map[string]string) (resp *http.Response, requestTime uint64, err error) {
 	method := "POST"
 
 	payload := &bytes.Buffer{}
@@ -44,16 +44,16 @@ func PostFormData(url string, data map[string]string) (string, error) {
 	for k, v := range data {
 		_ = writer.WriteField(k, v)
 	}
-	err := writer.Close()
+	err = writer.Close()
 	if err != nil {
-		return "", err
+		return
 	}
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		return "", err
+		return
 	}
 
 	req.Header.Add("token", token)
@@ -61,12 +61,8 @@ func PostFormData(url string, data map[string]string) (string, error) {
 	req.Header.Add("Content-Type", "application/json")
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	return string(body), err
+	req.Close = true //DisableKeepAlives
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	return
 }
