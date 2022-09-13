@@ -83,11 +83,11 @@ func tickerEcho(ticker *time.Ticker, startTm time.Time, stopChan <-chan bool) {
 }
 
 // 打印进度
-func echoProcess(num int) {
-	if (num % (totalUserNum / 10)) == 0 {
-		fmt.Printf("Completed %d requests\n", num)
-	}
-}
+//func echoProcess(num int) {
+//	if (num % (totalUserNum / 10)) == 0 {
+//		fmt.Printf("Completed %d requests\n", num)
+//	}
+//}
 
 func echoHeader(maxTime, minTime time.Duration, successNum, failureNum uint64, processingTime, runTime time.Duration, qps float64) {
 	//| 最大请求时长| 最小请求时长 | 成功的处理数 | 失败的请求数 | 处理总时长 | 处理用时 |

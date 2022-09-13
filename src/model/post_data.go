@@ -1,4 +1,4 @@
-package http
+package model
 
 import (
 	"bytes"

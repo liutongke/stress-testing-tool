@@ -1,4 +1,4 @@
-package http
+package model
 
 import (
 	"stress-testing-tool/src/tool"
@@ -7,7 +7,7 @@ import (
 )
 
 // http请求提前登录
-func Http(userRunNum int, url string, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs) {
+func Http(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, req *Request) {
 
 	defer func() {
 		WgUser.Done()
@@ -15,7 +15,7 @@ func Http(userRunNum int, url string, WgUser *sync.WaitGroup, ch chan<- *tool.Re
 
 	for i := 0; i < userRunNum; i++ {
 
-		isSucc, dataLen, requestTime := send(url)
+		isSucc, dataLen, requestTime := send(req)
 
 		ch <- &tool.ResponseRs{
 			IsSucc:      isSucc,
@@ -26,8 +26,9 @@ func Http(userRunNum int, url string, WgUser *sync.WaitGroup, ch chan<- *tool.Re
 	}
 }
 
-func send(url string) (isSucc bool, dataLen int, requestTime time.Duration) {
-	resp, requestTime, err := PostFormData(url, map[string]string{"code": "wxdev"}, nil)
+func send(req *Request) (isSucc bool, dataLen int, requestTime time.Duration) {
+
+	resp, requestTime, err := PostFormData(req)
 	isSucc = true
 	if err != nil {
 		isSucc = false

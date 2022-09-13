@@ -1,6 +1,7 @@
-package http
+package model
 
 import (
+	"fmt"
 	"net/http"
 	"stress-testing-tool/src/tool"
 	"time"
@@ -8,10 +9,14 @@ import (
 
 var token string
 
-func PostFormData(url string, data map[string]string, request *Request) (response *http.Response, requestTime time.Duration, err error) {
+func PostFormData(request *Request) (r *http.Response, requestTime time.Duration, err error) {
+
+	method := request.Method
+	url := request.URL
+	body := request.Body
 
 	client := &http.Client{}
-	req, err := http.NewRequest(request.Method, url, request.Body)
+	req, err := http.NewRequest(method, url, body)
 
 	if err != nil {
 		return
@@ -22,13 +27,13 @@ func PostFormData(url string, data map[string]string, request *Request) (respons
 	}
 
 	req.Close = true //DisableKeepAlives
-
+	fmt.Println(request)
 	startTime := time.Now()
 
-	response, err = client.Do(req)
+	r, err = client.Do(req)
 
 	requestTime = tool.DiffNano(startTime)
-	defer response.Body.Close()
+	r.Body.Close()
 
 	return
 }
