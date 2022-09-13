@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"stress-testing-tool/src/tool"
 	"sync"
 	"time"
@@ -16,23 +15,23 @@ func Http(userRunNum int, url string, WgUser *sync.WaitGroup, ch chan<- *tool.Re
 
 	for i := 0; i < userRunNum; i++ {
 
-		startTime := time.Now()
+		isSucc, dataLen, requestTime := send(url)
 
-		_, _, err := PostFormData(url, map[string]string{"code": fmt.Sprintf("wxdev%d", i)})
-
-		if err != nil {
-			//fmt.Println(err)
-			//os.Exit(0)
-			ch <- &tool.ResponseRs{
-				Time:      tool.DiffNano(startTime),
-				IsSucceed: false,
-			}
-		} else {
-			ch <- &tool.ResponseRs{
-				Time:      tool.DiffNano(startTime),
-				IsSucceed: true,
-			}
+		ch <- &tool.ResponseRs{
+			IsSucc:      isSucc,
+			DataLen:     dataLen,
+			RequestTime: requestTime,
 		}
 
 	}
+}
+
+func send(url string) (isSucc bool, dataLen int, requestTime time.Duration) {
+	resp, requestTime, err := PostFormData(url, map[string]string{"code": "wxdev"}, nil)
+	isSucc = true
+	if err != nil {
+		isSucc = false
+	}
+	dataLen = int(resp.ContentLength)
+	return
 }

@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	userNum      = 100                   //并发数量
-	userRunNum   = 1000                 //单个并发执行的次数
+	userNum      = 100                  //并发数量
+	userRunNum   = 100                  //单个并发执行的次数
 	totalUserNum = userNum * userRunNum //总请求参数
 
 	WgUser       sync.WaitGroup

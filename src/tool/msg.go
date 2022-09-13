@@ -23,8 +23,9 @@ type Request struct {
 }
 
 type ResponseRs struct {
-	Time      time.Duration
-	IsSucceed bool
+	IsSucc      bool
+	DataLen     int
+	RequestTime time.Duration
 }
 
 // websocket请求的结构体
