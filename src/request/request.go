@@ -2,6 +2,7 @@ package request
 
 import (
 	"stress-testing-tool/src/http"
+	"stress-testing-tool/src/websocket"
 	"strings"
 )
 
@@ -33,7 +34,12 @@ func NewRequest(userNum, totalUserNum int, url string, keepalive int, postFile s
 	//http.GetHeader("multipart/form-data", "./post.txt", &req)
 
 	if postFile != "" && contentType != "" {
-		http.GetHeader(contentType, postFile, &req)
+		if form == FormTypeHTTP {
+			http.GetHeader(contentType, postFile, &req)
+		}
+		if form == FormTypeWebSocket {
+			websocket.GetWebsocketData(postFile, &req)
+		}
 	}
 
 	return &req, nil

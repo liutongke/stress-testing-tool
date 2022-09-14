@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"mime/multipart"
-	"os"
+	"stress-testing-tool/src/tool"
 	"strings"
 	"time"
 )
@@ -32,7 +32,7 @@ type Request struct {
 //multipart/form-data; boundary=300c39bc6b1b8366edd2ac1835ec4b0bd6daaa98800e305d5a443d224f67
 
 func GetHeader(ContentType, filePath string, req *Request) {
-	body, err := getFileData(filePath)
+	body, err := tool.GetFileData(filePath)
 
 	req.Method = "POST"
 
@@ -125,20 +125,4 @@ func GetMultipartFormData(body []byte) (io.Reader, string) {
 	}
 
 	return payload, writer.FormDataContentType()
-}
-
-// getFileData 读取本地的post数据文件
-func getFileData(filePath string) (content []byte, err error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-	content, err = io.ReadAll(file)
-	return
 }

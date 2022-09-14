@@ -2,6 +2,8 @@ package tool
 
 // Package helper 帮助函数，时间、数组的通用处理
 import (
+	"io"
+	"os"
 	"time"
 )
 
@@ -19,5 +21,21 @@ func InArrayStr(str string, arr []string) (inArray bool) {
 			break
 		}
 	}
+	return
+}
+
+// GetFileData  读取本地的post数据文件
+func GetFileData(filePath string) (content []byte, err error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	content, err = io.ReadAll(file)
 	return
 }
