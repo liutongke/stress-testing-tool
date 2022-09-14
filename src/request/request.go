@@ -1,12 +1,29 @@
 package request
 
 import (
-	"stress-testing-tool/src/model"
+	"stress-testing-tool/src/http"
+	"strings"
 )
 
-func NewRequest(userNum, totalUserNum int, url string, keepalive int, postFile string, contentType string) (request *model.Request, err error) {
-	var req model.Request
+// 支持协议
+const (
+	FormTypeHTTP      = "http"
+	FormTypeWebSocket = "webSocket"
+	FormTypeGRPC      = "grpc"
+)
 
+func NewRequest(userNum, totalUserNum int, url string, keepalive int, postFile string, contentType string) (request *http.Request, err error) {
+	var (
+		form string
+		req  http.Request
+	)
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+		form = FormTypeHTTP
+	} else if strings.HasPrefix(url, "ws://") || strings.HasPrefix(url, "wss://") {
+		form = FormTypeWebSocket
+	}
+
+	req.Form = form
 	req.Method = "GET"
 	req.URL = url
 	req.Headers = map[string]string{"Content-Type": "application/json"}
@@ -16,7 +33,7 @@ func NewRequest(userNum, totalUserNum int, url string, keepalive int, postFile s
 	//http.GetHeader("multipart/form-data", "./post.txt", &req)
 
 	if postFile != "" && contentType != "" {
-		model.GetHeader(contentType, postFile, &req)
+		http.GetHeader(contentType, postFile, &req)
 	}
 
 	return &req, nil

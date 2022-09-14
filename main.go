@@ -43,7 +43,7 @@ func main() {
 	}
 
 	newRequest, _ := request.NewRequest(userNum, totalUserNum, url, keepalive, postFile, contentType)
-	//fmt.Println(welcome)
+	fmt.Println(welcome)
 
 	src.Run(newRequest, userNum, totalUserNum)
 	//go run main.go -c 10 -n 1000 -u http://192.168.0.105:9500/ -t application/x-www-form-urlencoded -p C:\Users\keke\dev\docker\stress-testing-tool/post.txt

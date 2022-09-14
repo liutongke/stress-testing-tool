@@ -1,4 +1,4 @@
-package model
+package http
 
 import (
 	"stress-testing-tool/src/tool"

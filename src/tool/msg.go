@@ -44,9 +44,9 @@ type WsResponse struct {
 	Data interface{} `json:"data"` // 返回数据json
 }
 type WsRequest struct {
-	Id   string            `json:"id"`
-	Path string            `json:"path"`
-	Data map[string]string `json:"data"`
+	Id   string `json:"id"`
+	Path string `json:"path"`
+	Data string `json:"data"`
 }
 
 // 生成websocket请求的数据集合

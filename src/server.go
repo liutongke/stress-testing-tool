@@ -2,8 +2,10 @@ package src
 
 import (
 	"math"
-	"stress-testing-tool/src/model"
+	"stress-testing-tool/src/http"
+	"stress-testing-tool/src/request"
 	"stress-testing-tool/src/tool"
+	"stress-testing-tool/src/websocket"
 	"sync"
 )
 
@@ -24,7 +26,7 @@ var (
 
 )
 
-func Run(req *model.Request, userNum, totalUserNum int) {
+func Run(req *http.Request, userNum, totalUserNum int) {
 	go ReceivingResults(ResponseRsCh) //统计处理
 	WgTask.Add(1)
 	launchLink(req, userNum, totalUserNum)
@@ -35,14 +37,21 @@ func Run(req *model.Request, userNum, totalUserNum int) {
 }
 
 // 开启服务
-func launchLink(req *model.Request, userNum, totalUserNum int) {
+func launchLink(req *http.Request, userNum, totalUserNum int) {
 
 	for i := 0; i < userNum; i++ {
 		WgUser.Add(1)
 
-		userRunNum := int(math.Ceil(float64(totalUserNum / userNum)))
+		userRunNum := int(math.Ceil(float64(totalUserNum / userNum))) //每个用户发送的请求次数
 
-		go model.Http(userRunNum, &WgUser, ResponseRsCh, req)
+		switch req.Form {
+		case request.FormTypeHTTP:
+			go http.Http(userRunNum, &WgUser, ResponseRsCh, req)
+		case request.FormTypeWebSocket:
+			go websocket.Websocket(userRunNum, &WgUser, ResponseRsCh, req)
+		default: //暂时不支持的类型
+			WgUser.Done()
+		}
 	}
 
 }

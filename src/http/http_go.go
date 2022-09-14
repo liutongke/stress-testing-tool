@@ -1,9 +1,10 @@
-package model
+package http
 
 import (
-	"fmt"
+	"io"
 	"net/http"
 	"stress-testing-tool/src/tool"
+	"strings"
 	"time"
 )
 
@@ -13,10 +14,10 @@ func PostFormData(request *Request) (r *http.Response, requestTime time.Duration
 
 	method := request.Method
 	url := request.URL
-	body := request.Body
 
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, body)
+
+	req, err := http.NewRequest(method, url, postPyload(request))
 
 	if err != nil {
 		return
@@ -27,13 +28,28 @@ func PostFormData(request *Request) (r *http.Response, requestTime time.Duration
 	}
 
 	req.Close = true //DisableKeepAlives
-	fmt.Println(request)
+
 	startTime := time.Now()
 
 	r, err = client.Do(req)
 
 	requestTime = tool.DiffNano(startTime)
+
+	if err != nil {
+		return
+	}
+
 	r.Body.Close()
 
 	return
+}
+
+func postPyload(request *Request) io.Reader {
+
+	if request.Headers["Content-Type"] == "multipart/form-data" {
+		payload, _ := GetMultipartFormData([]byte(request.Body))
+		return payload
+
+	}
+	return strings.NewReader(request.Body)
 }

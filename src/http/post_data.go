@@ -1,4 +1,4 @@
-package model
+package http
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ type Request struct {
 	Form      string            // http/webSocket/tcp
 	Method    string            // 方法 GET/POST/PUT
 	Headers   map[string]string // Headers
-	Body      io.Reader         // body
+	Body      string            // body
 	Verify    string            // 验证的方法
 	Timeout   time.Duration     // 请求超时时间
 	Debug     bool              // 是否开启Debug模式
@@ -25,8 +25,6 @@ type Request struct {
 	Keepalive bool              // 是否开启长连接
 	Code      int               // 验证的状态码
 }
-
-var ()
 
 //req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 //req.Header.Add("Content-Type", "application/json")
@@ -56,7 +54,8 @@ func GetHeader(ContentType, filePath string, req *Request) {
 
 // req.Header.Add("Content-Type", "application/json")
 func getJson(body []byte, req *Request) *Request {
-	payload := strings.NewReader(string(body))
+	//payload := strings.NewReader(string(body))
+	payload := string(body)
 	req.Headers = map[string]string{"Content-Type": "application/json"}
 	req.Body = payload
 	return req
@@ -64,7 +63,8 @@ func getJson(body []byte, req *Request) *Request {
 
 // req.Header.Add("Content-Type", "text/plain")
 func getText(body []byte, req *Request) *Request {
-	payload := strings.NewReader(string(body))
+	//payload := strings.NewReader(string(body))
+	payload := string(body)
 	req.Headers = map[string]string{"Content-Type": "text/plain"}
 	req.Body = payload
 	return req
@@ -88,15 +88,22 @@ func getUrlencoded(body []byte, req *Request) *Request {
 
 	str := strings.Join(list, `&`)
 
-	payload := strings.NewReader(str)
+	//payload := strings.NewReader(str)
 
 	req.Headers = map[string]string{"Content-Type": "application/x-www-form-urlencoded"}
-	req.Body = payload
+	req.Body = str
 	return req
 }
 
 // multipart/form-data; boundary=300c39bc6b1b8366edd2ac1835ec4b0bd6daaa98800e305d5a443d224f67
 func getFormData(body []byte, req *Request) *Request {
+	_, formDataContentType := GetMultipartFormData(body)
+	req.Headers = map[string]string{"Content-Type": formDataContentType}
+	req.Body = string(body)
+	return req
+}
+
+func GetMultipartFormData(body []byte) (io.Reader, string) {
 	var content map[string]interface{}
 
 	err := json.Unmarshal(body, &content)
@@ -117,9 +124,7 @@ func getFormData(body []byte, req *Request) *Request {
 		panic(err)
 	}
 
-	req.Headers = map[string]string{"Content-Type": writer.FormDataContentType()}
-	req.Body = payload
-	return req
+	return payload, writer.FormDataContentType()
 }
 
 // getFileData 读取本地的post数据文件
