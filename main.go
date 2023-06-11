@@ -1,19 +1,26 @@
 package main
 
+//func main() {
+//	fmt.Println(welcome)
+//	//http.StartFormData("./f03293d19752707e9fc91e93061be8f0.jpg")
+//	http.StartXWWWFormUrlencoded()
+//}
+
 import (
 	"flag"
 	"fmt"
 	"stress-testing-tool/src"
-	"stress-testing-tool/src/request"
+	"stress-testing-tool/src/http"
 )
 
 var (
-	userNum      int //并发数量
-	totalUserNum int //总请求次数
-	url          string
-	keepalive    int
-	postFile     string
-	contentType  string
+	userNum      int    //并发数量
+	totalUserNum int    //总请求次数
+	url          string //请求地址
+	keepalive    int    //是否复用TCP 1开启0关闭
+	postBody     string //post请求体
+	postFile     string //post上传的文件
+	contentType  string //请求体类型
 ) // 定义几个变量，用于接收命令行的参数值
 
 func init() {
@@ -23,7 +30,8 @@ func init() {
 	flag.IntVar(&userNum, "c", 0, "用户数量")
 	flag.IntVar(&totalUserNum, "n", 0, "发起请求数量")
 	flag.IntVar(&keepalive, "k", 0, "复用连接")
-	flag.StringVar(&postFile, "p", "", "postfile，发送POST请求时需要上传的文件")
+	flag.StringVar(&postBody, "p", "", "选填：postBody，发送POST请求体数据")
+	flag.StringVar(&postFile, "f", "", "选填：postfile，发送POST请求时需要上传的文件")
 	flag.StringVar(&contentType, "t", "", "即content-type，用于设置Content-Type请求头信息,post请求必选项")
 	// 解析命令行参数写入注册的flag里
 	flag.Parse()
@@ -42,10 +50,25 @@ func main() {
 		return
 	}
 
-	newRequest, _ := request.NewRequest(userNum, totalUserNum, url, keepalive, postFile, contentType)
+	flagParam := &http.FlagParam{
+		Url:          url,
+		UserNum:      userNum,
+		TotalUserNum: totalUserNum,
+		Keepalive:    keepalive,
+		PostBody:     postBody,
+		PostFile:     postFile,
+		ContentType:  contentType,
+	}
+
+	userReq, err := http.NewRequest(flagParam)
+
 	fmt.Println(welcome)
 
-	src.Run(newRequest, userNum, totalUserNum)
+	if err != nil {
+		panic("初始化数据失败")
+	}
+
+	src.Run(userReq, flagParam)
 	//go run main.go -c 10 -n 1000 -u http://192.168.0.105:9500/ -t application/x-www-form-urlencoded -p C:\Users\keke\dev\docker\stress-testing-tool/post.txt
 }
 

@@ -1,11 +1,11 @@
 package websocket
 
 import (
-	"stress-testing-tool/src/http"
 	"stress-testing-tool/src/tool"
+	"stress-testing-tool/tmp"
 )
 
-func GetWebsocketData(filePath string, req *http.Request) {
+func GetWebsocketData(filePath string, req *main.Request) {
 	body, err := tool.GetFileData(filePath)
 	if err != nil {
 		panic(err)

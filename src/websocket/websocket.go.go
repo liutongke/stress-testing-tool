@@ -3,13 +3,13 @@ package websocket
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	"stress-testing-tool/src/http"
 	"stress-testing-tool/src/tool"
+	"stress-testing-tool/tmp"
 	"sync"
 	"time"
 )
 
-func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, req *http.Request) {
+func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, req *main.Request) {
 
 	defer func() {
 		WgUser.Done()
@@ -30,7 +30,7 @@ func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseR
 	sendMsg(userRunNum, conn, ch, req)
 }
 
-func sendMsg(userRunNum int, conn *websocket.Conn, ch chan<- *tool.ResponseRs, req *http.Request) {
+func sendMsg(userRunNum int, conn *websocket.Conn, ch chan<- *tool.ResponseRs, req *main.Request) {
 
 	timer := time.NewTimer(1 * time.Second) //一秒后激活时间
 	n := 0

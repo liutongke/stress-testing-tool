@@ -7,7 +7,7 @@ import (
 )
 
 // http请求提前登录
-func Http(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, req *Request) {
+func Http(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, userReq *Request) {
 
 	defer func() {
 		WgUser.Done()
@@ -15,7 +15,7 @@ func Http(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, re
 
 	for i := 0; i < userRunNum; i++ {
 
-		isSucc, dataLen, requestTime := send(req)
+		isSucc, dataLen, requestTime := send(userReq)
 
 		ch <- &tool.ResponseRs{
 			IsSucc:      isSucc,
@@ -26,13 +26,10 @@ func Http(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, re
 	}
 }
 
-func send(req *Request) (isSucc bool, dataLen int, requestTime time.Duration) {
+func send(userReq *Request) (isSucc bool, dataLen int, requestTime time.Duration) {
 
-	resp, requestTime, err := PostFormData(req)
-	isSucc = true
-	if err != nil {
-		isSucc = false
-	}
+	resp, requestTime, isSucc := HttpDo(userReq)
+	//resp, requestTime, err := PostFormData(req)
 	dataLen = int(resp.ContentLength)
 	return
 }

@@ -3,9 +3,7 @@ package src
 import (
 	"math"
 	"stress-testing-tool/src/http"
-	"stress-testing-tool/src/request"
 	"stress-testing-tool/src/tool"
-	"stress-testing-tool/src/websocket"
 	"sync"
 )
 
@@ -26,10 +24,10 @@ var (
 
 )
 
-func Run(req *http.Request, userNum, totalUserNum int) {
+func Run(userReq *http.Request, flagParam *http.FlagParam) {
 	go ReceivingResults(ResponseRsCh) //统计处理
 	WgTask.Add(1)
-	launchLink(req, userNum, totalUserNum)
+	launchLink(userReq, flagParam)
 
 	WgUser.Wait()
 	close(ResponseRsCh)
@@ -37,18 +35,18 @@ func Run(req *http.Request, userNum, totalUserNum int) {
 }
 
 // 开启服务
-func launchLink(req *http.Request, userNum, totalUserNum int) {
+func launchLink(userReq *http.Request, flagParam *http.FlagParam) {
 
-	for i := 0; i < userNum; i++ {
+	for i := 0; i < flagParam.UserNum; i++ {
 		WgUser.Add(1)
-
-		userRunNum := int(math.Ceil(float64(totalUserNum / userNum))) //每个用户发送的请求次数
-
-		switch req.Form {
-		case request.FormTypeHTTP:
-			go http.Http(userRunNum, &WgUser, ResponseRsCh, req)
-		case request.FormTypeWebSocket:
-			go websocket.Websocket(userRunNum, &WgUser, ResponseRsCh, req)
+		userRunNum := int(math.Ceil(float64(flagParam.TotalUserNum / flagParam.UserNum))) //每个用户发送的请求次数
+		switch userReq.Form {
+		case http.FormTypeHTTP:
+			go http.Http(userRunNum, &WgUser, ResponseRsCh, userReq)
+		case http.FormTypeWebSocket:
+			//go websocket.Websocket(userRunNum, &WgUser, ResponseRsCh, req)
+		case http.FormTypeProcess: //流程测试
+			//go process.Start(userRunNum, &WgUser, ResponseRsCh, postFile)
 		default: //暂时不支持的类型
 			WgUser.Done()
 		}
