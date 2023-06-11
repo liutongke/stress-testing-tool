@@ -3,19 +3,19 @@ package websocket
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"stress-testing-tool/src/http"
 	"stress-testing-tool/src/tool"
-	"stress-testing-tool/tmp"
 	"sync"
 	"time"
 )
 
-func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, req *main.Request) {
+func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseRs, userReq *http.Request, flagParam *http.FlagParam) {
 
 	defer func() {
 		WgUser.Done()
 	}()
 
-	conn, err := StartWsConn(req.URL)
+	conn, err := StartWsConn(userReq.URL)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("websocket err --------->"))
 	}
@@ -27,10 +27,11 @@ func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseR
 		}
 	}()
 
-	sendMsg(userRunNum, conn, ch, req)
+	sendMsg(userRunNum, conn, ch, userReq, flagParam)
 }
 
-func sendMsg(userRunNum int, conn *websocket.Conn, ch chan<- *tool.ResponseRs, req *main.Request) {
+func sendMsg(userRunNum int, conn *websocket.Conn, ch chan<- *tool.ResponseRs, userReq *http.Request, flagParam *http.FlagParam) {
+	body, _ := tool.GetFileData(flagParam.PostBody)
 
 	timer := time.NewTimer(1 * time.Second) //一秒后激活时间
 	n := 0
@@ -41,7 +42,7 @@ func sendMsg(userRunNum int, conn *websocket.Conn, ch chan<- *tool.ResponseRs, r
 			timer.Reset(1 * time.Second) //重置倒计时
 			n++
 
-			isSucc, dataLen, requestTime := WebSocketRequest(conn, req.Body)
+			isSucc, dataLen, requestTime := WebSocketRequest(conn, body)
 
 			ch <- &tool.ResponseRs{
 				IsSucc:      isSucc,

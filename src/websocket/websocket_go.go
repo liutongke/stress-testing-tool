@@ -31,13 +31,13 @@ func pushChan(duration time.Duration, succ bool, ch chan<- *tool.ResponseRs) {
 	}
 }
 
-func WebSocketRequest(conn *websocket.Conn, wsSendData string) (isSucc bool, DataLen int, RequestTime time.Duration) {
+func WebSocketRequest(conn *websocket.Conn, wsSendData []byte) (isSucc bool, DataLen int, RequestTime time.Duration) {
 	isSucc = false
 	DataLen = 0
 	RequestTime = 0
 	var startTime = time.Now()
 
-	writeErr := conn.WriteMessage(1, []byte(wsSendData))
+	writeErr := conn.WriteMessage(1, wsSendData)
 	if writeErr != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func WebSocketRequest(conn *websocket.Conn, wsSendData string) (isSucc bool, Dat
 	if readErr != nil {
 		return
 	}
-
+	
 	isSucc = true
 	DataLen = len(msg)
 	RequestTime = tool.DiffNano(startTime)

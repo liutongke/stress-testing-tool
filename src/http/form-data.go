@@ -28,12 +28,14 @@ func generateFormDataPayload(flagParam *FlagParam) (*bytes.Buffer, *multipart.Wr
 		}
 	}
 
-	body := GetPostBody(flagParam)
+	if flagParam.PostBody != "" {
+		body := GetPostBody(flagParam)
 
-	for k, v := range body {
-		_ = writer.WriteField(k, v)
+		for k, v := range body {
+			_ = writer.WriteField(k, v)
+		}
+		//_ = writer.WriteField("num", "2")
 	}
-	//_ = writer.WriteField("num", "2")
 	err := writer.Close()
 
 	if err != nil {
