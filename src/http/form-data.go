@@ -47,7 +47,7 @@ func setFormDataHeader(req *http.Request, userReq *Request, writer *multipart.Wr
 	for k, v := range userReq.Headers {
 		req.Header.Add(k, v)
 	}
-	req.Header.Add("x-token", "5656565656")
+	//req.Header.Add("x-token", "5656565656")
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 }
 

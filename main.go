@@ -21,6 +21,8 @@ var (
 	postBody     string //post请求体
 	postFile     string //post上传的文件
 	contentType  string //请求体类型
+
+	headerFile string //携带的请求头
 ) // 定义几个变量，用于接收命令行的参数值
 
 func init() {
@@ -33,6 +35,7 @@ func init() {
 	flag.StringVar(&postBody, "p", "", "选填：postBody，发送POST请求体数据")
 	flag.StringVar(&postFile, "f", "", "选填：postfile，发送POST请求时需要上传的文件")
 	flag.StringVar(&contentType, "t", "", "即content-type，用于设置Content-Type请求头信息,post请求必选项")
+	flag.StringVar(&headerFile, "h", "", "携带的请求头")
 	// 解析命令行参数写入注册的flag里
 	flag.Parse()
 	// 输出结果
@@ -58,6 +61,7 @@ func main() {
 		PostBody:     postBody,
 		PostFile:     postFile,
 		ContentType:  contentType,
+		HeaderFile:   headerFile,
 	}
 
 	userReq, err := http.NewRequest(flagParam)

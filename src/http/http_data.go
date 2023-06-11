@@ -1,10 +1,6 @@
 package http
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"time"
 )
@@ -24,28 +20,4 @@ type Request struct {
 	Keepalive bool              // 是否开启长连接
 	Code      int               // 验证的状态码
 	Req       *http.Request     //发送的请求信息
-}
-
-func GetMultipartFormData(body []byte) (io.Reader, string) {
-	var content map[string]interface{}
-
-	err := json.Unmarshal(body, &content)
-	if err != nil {
-		panic(err)
-	}
-
-	payload := &bytes.Buffer{}
-
-	writer := multipart.NewWriter(payload)
-
-	for k, v := range content {
-		_ = writer.WriteField(k, v.(string))
-	}
-
-	err = writer.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	return payload, writer.FormDataContentType()
 }

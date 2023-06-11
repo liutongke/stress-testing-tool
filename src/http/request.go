@@ -1,6 +1,9 @@
 package http
 
 import (
+	"encoding/json"
+	"fmt"
+	"stress-testing-tool/src/tool"
 	"strings"
 )
 
@@ -21,6 +24,23 @@ type FlagParam struct {
 	PostBody     string
 	PostFile     string
 	ContentType  string
+	HeaderFile   string
+}
+
+func getHeader(flagParam *FlagParam) map[string]string {
+	data, err := tool.GetFileData(flagParam.HeaderFile)
+	if err != nil {
+		return nil
+	}
+
+	var result map[string]string
+	err = json.Unmarshal(data, &result)
+
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return nil
+	}
+	return result
 }
 
 func NewRequest(flagParam *FlagParam) (userReq *Request, err error) {
@@ -33,10 +53,11 @@ func NewRequest(flagParam *FlagParam) (userReq *Request, err error) {
 	}
 
 	userReq = &Request{
-		URL:       flagParam.Url,
-		Form:      form,
-		Method:    method,
-		Headers:   map[string]string{"Content-Type": "application/json"},
+		URL:    flagParam.Url,
+		Form:   form,
+		Method: method,
+		//Headers:   map[string]string{"Content-Type": "application/json"},
+		Headers:   getHeader(flagParam),
 		Keepalive: flagParam.Keepalive != 1, //true关闭 false开启
 	}
 	//http.GetHeader("application/x-www-form-urlencoded", "./post.txt", &req)
