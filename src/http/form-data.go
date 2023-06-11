@@ -51,20 +51,19 @@ func setFormDataHeader(req *http.Request, userReq *Request, writer *multipart.Wr
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 }
 
-func StartFormData(userReq *Request, flagParam *FlagParam) (err error) {
+func StartFormData(userReq *Request, flagParam *FlagParam) *http.Request {
 	payload, writer := generateFormDataPayload(flagParam)
 
 	req, err := http.NewRequest(userReq.Method, userReq.URL, payload)
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
 
 	setFormDataHeader(req, userReq, writer)
 
 	//isSucc, body := do(req)
 	//fmt.Println(isSucc, string(body))
-	userReq.Req = req
-	return
+	return req
 }

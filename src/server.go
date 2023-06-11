@@ -42,7 +42,7 @@ func launchLink(userReq *http.Request, flagParam *http.FlagParam) {
 		userRunNum := int(math.Ceil(float64(flagParam.TotalUserNum / flagParam.UserNum))) //每个用户发送的请求次数
 		switch userReq.Form {
 		case http.FormTypeHTTP:
-			go http.Http(userRunNum, &WgUser, ResponseRsCh, userReq)
+			go http.Http(userRunNum, &WgUser, ResponseRsCh, userReq, flagParam)
 		case http.FormTypeWebSocket:
 			//go websocket.Websocket(userRunNum, &WgUser, ResponseRsCh, req)
 		case http.FormTypeProcess: //流程测试

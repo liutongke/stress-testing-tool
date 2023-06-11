@@ -65,19 +65,19 @@ func NewRequest(flagParam *FlagParam) (userReq *Request, err error) {
 	//http.GetHeader("text/plain", "./post.txt", &req)
 	//http.GetHeader("multipart/form-data", "./post.txt", &req)
 
-	switch flagParam.ContentType {
-	case "application/x-www-form-urlencoded":
-		err = StartXWWWFormUrlencoded(userReq, flagParam)
-
-	case "application/json":
-		err = StartFormData(userReq, flagParam)
-	case "text/plain":
-		//getText(body, req)
-	case "multipart/form-data":
-		//getFormData(body, req)
-	default:
-		// 处理未知的 ContentType
-	}
+	//switch flagParam.ContentType {
+	//case "application/x-www-form-urlencoded":
+	//	err = StartXWWWFormUrlencoded(userReq, flagParam)
+	//
+	//case "application/json":
+	//	err = StartFormData(userReq, flagParam)
+	//case "text/plain":
+	//	//getText(body, req)
+	//case "multipart/form-data":
+	//	//getFormData(body, req)
+	//default:
+	//	// 处理未知的 ContentType
+	//}
 	//if form == FormTypeWebSocket {
 	//	websocket.GetWebsocketData(postFile, req)
 	//}

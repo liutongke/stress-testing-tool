@@ -34,18 +34,17 @@ func setHeader(req *http.Request, userReq *Request) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 }
 
-func StartXWWWFormUrlencoded(userReq *Request, flagParam *FlagParam) (err error) {
+func StartXWWWFormUrlencoded(userReq *Request, flagParam *FlagParam) *http.Request {
 	payload := generatePayload(flagParam)
 
 	req, err := http.NewRequest(userReq.Method, userReq.URL, payload)
 
 	if err != nil {
-		return
+		return nil
 	}
 
 	setHeader(req, userReq)
 
-	userReq.Req = req
 	//isSucc, body = do(req)
-	return
+	return req
 }

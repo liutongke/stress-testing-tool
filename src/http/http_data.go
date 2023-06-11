@@ -1,7 +1,6 @@
 package http
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -19,5 +18,4 @@ type Request struct {
 	HTTP2     bool              // 是否使用http2.0
 	Keepalive bool              // 是否开启长连接
 	Code      int               // 验证的状态码
-	Req       *http.Request     //发送的请求信息
 }
