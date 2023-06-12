@@ -44,9 +44,9 @@ func HttpDo(userReq *Request, flagParam *FlagParam) *tool.ResponseRs {
 func myRequest(userReq *Request, flagParam *FlagParam) (myReq *http.Request) {
 	switch flagParam.ContentType {
 	case "application/x-www-form-urlencoded":
-		myReq = StartXWWWFormUrlencoded(userReq, flagParam)
+		myReq = NewXWWWFormUrlencoded().GenerateRequest(userReq, flagParam)
 	case "application/json":
-		myReq = StartFormData(userReq, flagParam)
+		myReq = NewFormData().GenerateRequest(userReq, flagParam)
 	case "text/plain":
 		//getText(body, req)
 	case "multipart/form-data":

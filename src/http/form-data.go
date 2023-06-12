@@ -10,7 +10,14 @@ import (
 	"path/filepath"
 )
 
-func generateFormDataPayload(flagParam *FlagParam) (*bytes.Buffer, *multipart.Writer) {
+type FormData struct {
+}
+
+func NewFormData() *FormData {
+	return &FormData{}
+}
+
+func (f *FormData) generatePayload(flagParam *FlagParam) (*bytes.Buffer, *multipart.Writer) {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 
@@ -45,7 +52,7 @@ func generateFormDataPayload(flagParam *FlagParam) (*bytes.Buffer, *multipart.Wr
 	return payload, writer
 }
 
-func setFormDataHeader(req *http.Request, userReq *Request, writer *multipart.Writer) {
+func (f *FormData) setHeader(req *http.Request, userReq *Request, writer *multipart.Writer) {
 	for k, v := range userReq.Headers {
 		req.Header.Add(k, v)
 	}
@@ -53,8 +60,8 @@ func setFormDataHeader(req *http.Request, userReq *Request, writer *multipart.Wr
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 }
 
-func StartFormData(userReq *Request, flagParam *FlagParam) *http.Request {
-	payload, writer := generateFormDataPayload(flagParam)
+func (f *FormData) GenerateRequest(userReq *Request, flagParam *FlagParam) *http.Request {
+	payload, writer := f.generatePayload(flagParam)
 
 	req, err := http.NewRequest(userReq.Method, userReq.URL, payload)
 
@@ -63,7 +70,7 @@ func StartFormData(userReq *Request, flagParam *FlagParam) *http.Request {
 		return nil
 	}
 
-	setFormDataHeader(req, userReq, writer)
+	f.setHeader(req, userReq, writer)
 
 	//isSucc, body := do(req)
 	//fmt.Println(isSucc, string(body))

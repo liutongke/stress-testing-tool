@@ -30,12 +30,12 @@ func init() {
 	// &user 就是接收命令行中输入 -u 后面的参数值，其他同理
 	flag.StringVar(&url, "u", "url", "压测地址")
 	flag.IntVar(&userNum, "c", 0, "用户数量")
-	flag.IntVar(&totalUserNum, "n", 0, "发起请求数量")
-	flag.IntVar(&keepalive, "k", 0, "复用连接")
+	flag.IntVar(&totalUserNum, "n", 0, "发起请求总数量")
+	flag.IntVar(&keepalive, "k", 0, "选填：复用连接")
 	flag.StringVar(&postBody, "p", "", "选填：postBody，发送POST请求体数据")
 	flag.StringVar(&postFile, "f", "", "选填：postfile，发送POST请求时需要上传的文件")
 	flag.StringVar(&contentType, "t", "", "即content-type，用于设置Content-Type请求头信息,post请求必选项")
-	flag.StringVar(&headerFile, "h", "", "携带的请求头")
+	flag.StringVar(&headerFile, "h", "", "选填：携带的请求头")
 	// 解析命令行参数写入注册的flag里
 	flag.Parse()
 	// 输出结果

@@ -1,4 +1,4 @@
-package websocket
+package ws
 
 import (
 	"fmt"
@@ -15,9 +15,10 @@ func Websocket(userRunNum int, WgUser *sync.WaitGroup, ch chan<- *tool.ResponseR
 		WgUser.Done()
 	}()
 
-	conn, err := StartWsConn(userReq.URL)
+	conn, err := StartWsConn(userReq.URL, flagParam)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("websocket err --------->"))
+		fmt.Println("websocket StartWsConn err --------->", err)
+		return
 	}
 
 	defer func() {

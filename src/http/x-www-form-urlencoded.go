@@ -6,7 +6,14 @@ import (
 	"strings"
 )
 
-func generatePayload(flagParam *FlagParam) *strings.Reader {
+type XWWWFormUrlencoded struct {
+}
+
+func NewXWWWFormUrlencoded() *XWWWFormUrlencoded {
+	return &XWWWFormUrlencoded{}
+}
+
+func (x *XWWWFormUrlencoded) generatePayload(flagParam *FlagParam) *strings.Reader {
 	// 创建一个空的 url.Values 对象
 	values := url.Values{}
 
@@ -26,7 +33,7 @@ func generatePayload(flagParam *FlagParam) *strings.Reader {
 	return strings.NewReader(queryString)
 }
 
-func setHeader(req *http.Request, userReq *Request) {
+func (x *XWWWFormUrlencoded) setHeader(req *http.Request, userReq *Request) {
 	for k, v := range userReq.Headers {
 		req.Header.Add(k, v)
 	}
@@ -34,8 +41,8 @@ func setHeader(req *http.Request, userReq *Request) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 }
 
-func StartXWWWFormUrlencoded(userReq *Request, flagParam *FlagParam) *http.Request {
-	payload := generatePayload(flagParam)
+func (x *XWWWFormUrlencoded) GenerateRequest(userReq *Request, flagParam *FlagParam) *http.Request {
+	payload := x.generatePayload(flagParam)
 
 	req, err := http.NewRequest(userReq.Method, userReq.URL, payload)
 
@@ -43,7 +50,7 @@ func StartXWWWFormUrlencoded(userReq *Request, flagParam *FlagParam) *http.Reque
 		return nil
 	}
 
-	setHeader(req, userReq)
+	x.setHeader(req, userReq)
 
 	//isSucc, body = do(req)
 	return req

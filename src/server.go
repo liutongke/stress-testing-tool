@@ -4,7 +4,7 @@ import (
 	"math"
 	"stress-testing-tool/src/http"
 	"stress-testing-tool/src/tool"
-	"stress-testing-tool/src/websocket"
+	"stress-testing-tool/src/ws"
 	"sync"
 )
 
@@ -45,7 +45,7 @@ func launchLink(userReq *http.Request, flagParam *http.FlagParam) {
 		case http.FormTypeHTTP:
 			go http.Http(userRunNum, &WgUser, ResponseRsCh, userReq, flagParam)
 		case http.FormTypeWebSocket:
-			go websocket.Websocket(userRunNum, &WgUser, ResponseRsCh, userReq, flagParam)
+			go ws.Websocket(userRunNum, &WgUser, ResponseRsCh, userReq, flagParam)
 		case http.FormTypeProcess: //流程测试
 			//go process.Start(userRunNum, &WgUser, ResponseRsCh, postFile)
 		default: //暂时不支持的类型

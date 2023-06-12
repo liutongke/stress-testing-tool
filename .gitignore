@@ -1,21 +1,5 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
-
-# Other files and folders
-.settings/
-
-# Executables
 *.swf
 *.air
-*.ipa
-*.apk
-
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
 /.idea
 /storage
 tmp
@@ -23,3 +7,4 @@ f03293d19752707e9fc91e93061be8f0.jpg
 post.txt
 process.json
 header.txt
+ws.txt
