@@ -1,101 +1,163 @@
 package http_client
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"math"
 	"net/http"
+	"os"
 	"stress-testing-tool/src/tool"
+	"strings"
 	"sync"
 	"time"
 )
 
-// 定义 RequestGenerator 接口
+// RequestGenerator 定义接口
 type RequestGenerator interface {
 	GenerateRequest(flagParam *ABConfig) (*http.Response, time.Duration, error)
 }
 
-// FormDataGenerator 处理 "form-data" 类型的请求生成
+// FormDataGenerator 处理 form-data 类型的请求生成
 type FormDataGenerator struct{}
 
 func (g FormDataGenerator) GenerateRequest(flagParam *ABConfig) (*http.Response, time.Duration, error) {
-	// 实现 form-data 请求生成逻辑...
-	// 自定义请求头
-	//customHeaders := map[string]string{
-	//	"X-Custom-Header": "my-custom-value",
-	//}
-	// 示例调用
-	return SendMultipartFormData(flagParam.RequestURL, flagParam.Method, map[string]string{"key": "FormData"}, map[string]string{"file": "./example.txt"}, flagParam.Headers)
 
+	var (
+		formData      map[string]string
+		filesFormData map[string]string
+		err           error
+	)
+
+	// 提取JSON文件内容到formData
+	if flagParam.Postfile != "" {
+		formData, err = jsonFormDataFromFile(flagParam.Postfile)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
+	// 提取JSON文件内容到filesFormData
+	if flagParam.Files != "" {
+		filesFormData, err = jsonFormDataFromFile(flagParam.Files)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
+	// 假设SendMultipartFormData函数可接受文件的map[string]string
+	return SendMultipartFormData(flagParam.RequestURL, flagParam.Method, formData, filesFormData, flagParam.Headers)
 }
 
-// XWWWFormUrlencodedGenerator 处理 "x-www-form-urlencoded" 类型的请求生成
+// XWWWFormUrlencodedGenerator 处理 x-www-form-urlencoded 类型的请求生成
 type XWWWFormUrlencodedGenerator struct{}
 
 func (g XWWWFormUrlencodedGenerator) GenerateRequest(flagParam *ABConfig) (*http.Response, time.Duration, error) {
-	// 实现 x-www-form-urlencoded 请求生成逻辑...
-	//http_client.PrintResponse(http_client.SendFormURLEncoded("http://192.168.0.110:12349/form", url.Values{"key": []string{"FormURLEncoded-keke"}, "key1": []string{"key1"}}, customHeaders))
-	return SendFormURLEncoded(flagParam.RequestURL, flagParam.Method, map[string]string{"key": "FormURLEncoded-test", "key1": "test"}, flagParam.Headers)
+	// 从文件读取表单字段并生成x-www-form-urlencoded数据
+	var (
+		formData map[string]string
+		err      error
+	)
 
+	// 提取JSON文件内容到formData
+	if flagParam.Postfile != "" {
+		formData, err = jsonFormDataFromFile(flagParam.Postfile)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+	// 假设SendFormURLEncoded函数可接受map[string]string
+	return SendFormURLEncoded(flagParam.RequestURL, flagParam.Method, formData, flagParam.Headers)
 }
 
-// RawDataGenerator 处理 "raw" 类型的请求生成
+// jsonFormDataFromFile 读取JSON文件，并转换为表单数据
+func jsonFormDataFromFile(filePath string) (map[string]string, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read from file %s: %w", filePath, err)
+	}
+
+	// 解析JSON文件内容到map中
+	var formData map[string]string
+	err = json.Unmarshal(data, &formData)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse JSON file %s: %w", filePath, err)
+	}
+
+	return formData, nil
+}
+
+// RawDataGenerator 处理 raw 类型的请求生成
 type RawDataGenerator struct{}
 
 func (g RawDataGenerator) GenerateRequest(flagParam *ABConfig) (*http.Response, time.Duration, error) {
-	// 实现 raw 数据请求生成逻辑...
-	return SendRaw(flagParam.RequestURL, flagParam.Method, "application/json", []byte(`{"key": "raw"}`), flagParam.Headers)
+	contentType := getContentType(flagParam.Headers, "application/json")
 
+	requestBody, err := os.ReadFile(flagParam.Postfile)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error reading request body file: %w", err)
+	}
+
+	return SendRaw(flagParam.RequestURL, flagParam.Method, contentType, requestBody, flagParam.Headers)
 }
 
-// BinaryDataGenerator 处理 "binary" 类型的请求生成
+// BinaryDataGenerator 处理 binary 类型的请求生成
 type BinaryDataGenerator struct{}
 
 func (g BinaryDataGenerator) GenerateRequest(flagParam *ABConfig) (*http.Response, time.Duration, error) {
-	// 实现 binary 数据请求生成逻辑...
-	return SendBinary(flagParam.RequestURL, flagParam.Method, "application/octet-stream", []byte{0x00, 0x01, 0x02}, flagParam.Headers)
+	requestBody, err := os.ReadFile(flagParam.Files)
+
+	if err != nil {
+		return nil, 0, fmt.Errorf("error reading request body file: %w", err)
+	}
+
+	return SendBinary(flagParam.RequestURL, flagParam.Method, "application/octet-stream", requestBody, flagParam.Headers)
 }
 
 // CreateGenerator 根据 ContentType 创建对应的 RequestGenerator
-func CreateGenerator(contentType string) RequestGenerator {
+func CreateGenerator(contentType string) (RequestGenerator, error) {
 	switch contentType {
 	case "form-data":
-		return FormDataGenerator{}
+		return &FormDataGenerator{}, nil
 	case "x-www-form-urlencoded":
-		return XWWWFormUrlencodedGenerator{}
+		return &XWWWFormUrlencodedGenerator{}, nil
 	case "raw":
-		return RawDataGenerator{}
+		return &RawDataGenerator{}, nil
 	case "binary":
-		return BinaryDataGenerator{}
+		return &BinaryDataGenerator{}, nil
 	default:
-		// 处理未知的 ContentType 或返回错误信息
+		return nil, errors.New("unsupported content type")
 	}
-	return nil
 }
 
-// 使用 CreateGenerator 函数来处理请求
+// ProcessRequest 使用 CreateGenerator 函数来处理请求
 func ProcessRequest(flagParam *ABConfig) (*http.Response, time.Duration, error) {
-	generator := CreateGenerator(flagParam.ContentType)
-	if generator != nil {
-		return generator.GenerateRequest(flagParam)
+	generator, err := CreateGenerator(flagParam.ContentType)
+	if err != nil {
+		return nil, 0, err
 	}
-	// 处理没有对应处理器的情况，或返回错误信息
-	return nil, 0, nil
+	return generator.GenerateRequest(flagParam)
 }
 
 // http请求提前登录
 func StartHTTPRequest(WgHTTPRequest *sync.WaitGroup, ch chan<- *tool.ResponseRs, flagParam *ABConfig) {
-
-	defer func() {
-		WgHTTPRequest.Done()
-	}()
-	userRunNum := int(math.Ceil(float64(flagParam.Requests / flagParam.Concurrency))) //每个用户发送的请求次数
+	defer WgHTTPRequest.Done()
+	userRunNum := int(math.Ceil(float64(flagParam.Requests / flagParam.Concurrency)))
 	for i := 0; i < userRunNum; i++ {
 		ch <- send(flagParam)
-
-		//time.Sleep(requestInterval)
-		//time.Sleep(1000 * time.Millisecond) // 等待一下，然后再发起下一个请求
 	}
 }
 
 func send(flagParam *ABConfig) *tool.ResponseRs {
 	return DoResponse(ProcessRequest(flagParam))
+}
+
+// getContentType 获取或设置 'Content-Type' 的函数
+func getContentType(headers map[string]string, defaultValue string) string {
+	for k, v := range headers {
+		if strings.EqualFold(k, "Content-Type") {
+			return v
+		}
+	}
+	return defaultValue
 }

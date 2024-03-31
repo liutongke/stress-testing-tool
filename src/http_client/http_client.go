@@ -102,27 +102,31 @@ func SendMultipartFormData(requestURL, method string, fields map[string]string, 
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
-	// 添加表单字段
-	for field, value := range fields {
-		if err := writer.WriteField(field, value); err != nil {
-			return nil, 0, err
+	if fields != nil {
+		// 添加表单字段
+		for field, value := range fields {
+			if err := writer.WriteField(field, value); err != nil {
+				return nil, 0, err
+			}
 		}
 	}
 
-	// 添加文件
-	for fieldname, filename := range files {
-		file, err := os.Open(filename)
-		if err != nil {
-			return nil, 0, err
-		}
-		defer file.Close()
+	if files != nil {
+		// 添加文件
+		for fieldname, filename := range files {
+			file, err := os.Open(filename)
+			if err != nil {
+				return nil, 0, err
+			}
+			defer file.Close()
 
-		part, err := writer.CreateFormFile(fieldname, filename)
-		if err != nil {
-			return nil, 0, err
-		}
-		if _, err = io.Copy(part, file); err != nil {
-			return nil, 0, err
+			part, err := writer.CreateFormFile(fieldname, filename)
+			if err != nil {
+				return nil, 0, err
+			}
+			if _, err = io.Copy(part, file); err != nil {
+				return nil, 0, err
+			}
 		}
 	}
 

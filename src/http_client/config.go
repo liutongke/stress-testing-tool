@@ -25,7 +25,7 @@ func (h *HeaderDict) Set(value string) error {
 
 	key := strings.TrimSpace(parts[0])
 	val := strings.TrimSpace(parts[1])
-	(*h)[key] = val
+	(*h)[strings.ToLower(key)] = val
 
 	return nil
 }
@@ -37,6 +37,7 @@ type ABConfig struct {
 	Concurrency   int
 	Timelimit     int
 	Postfile      string
+	Files         string
 	ContentType   string
 	Headers       HeaderDict
 	Putfile       string
@@ -69,6 +70,7 @@ func NewFlagConfig() *ABConfig {
 	flag.IntVar(&cfg.Concurrency, "c", 1, "并发请求数")
 	flag.IntVar(&cfg.Timelimit, "t", 0, "最长执行时间（秒）")
 	flag.StringVar(&cfg.Postfile, "p", "", "包含要POST的数据的文件路径")
+	flag.StringVar(&cfg.Files, "f", "", "包含要上传的文件路径")
 	flag.StringVar(&cfg.ContentType, "T", "application/x-www-form-urlencoded", "POST数据的Content-Type")
 	flag.Var(&cfg.Headers, "H", "自定义HTTP头信息。例如：-H 'Accept: application/json' -H 'Cookie: mycookie'")
 	flag.StringVar(&cfg.Putfile, "u", "", "包含要PUT的数据的文件路径")
