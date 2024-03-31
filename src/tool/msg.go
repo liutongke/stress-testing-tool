@@ -25,6 +25,7 @@ type Request struct {
 type ResponseRs struct {
 	IsSucc      bool
 	DataLen     int
+	Body        string
 	RequestTime time.Duration
 }
 

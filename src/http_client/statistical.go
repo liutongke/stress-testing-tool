@@ -1,4 +1,4 @@
-package src
+package http_client
 
 import (
 	"fmt"
@@ -59,10 +59,8 @@ func ReceivingResults(ch <-chan *tool.ResponseRs) {
 	//|-----------|------------|-------------|------------|----------|---------|
 	//| %s        | %s         | %d          | %d         | %s       | %s      |
 
-	fmt.Println("-------success-------")
 	echoHeader(maxTime, minTime, successNum, failureNum, processingTime, runTime, qps)
-	fmt.Println("-------end-------")
-	WgTask.Done()
+	WgHTTPStressTester.Done()
 }
 
 // 定时输出一次结果
@@ -82,17 +80,20 @@ func tickerEcho(ticker *time.Ticker, startTm time.Time, stopChan <-chan bool) {
 	}
 }
 
-// 打印进度
-//func echoProcess(num int) {
-//	if (num % (totalUserNum / 10)) == 0 {
-//		fmt.Printf("Completed %d requests\n", num)
-//	}
-//}
-
 func echoHeader(maxTime, minTime time.Duration, successNum, failureNum uint64, processingTime, runTime time.Duration, qps float64) {
-	//| 最大请求时长| 最小请求时长 | 成功的处理数 | 失败的请求数 | 处理总时长 | 处理用时 |
-	//|-----------|------------|-------------|------------|----------|---------|
-	fmt.Printf("最大请求时长:%s 最小请求时长:%s 成功的处理数:%d 失败的请求数:%d 处理总时长:%s 处理用时:%s qps:%d\n", maxTime, minTime, successNum, failureNum, processingTime, runTime, int(qps))
-	fmt.Println("=============================================================================================================================")
-	return
+	//fmt.Println("统计信息")
+	//fmt.Println("----------------------")
+	fmt.Printf("最大请求时长: %v\n", maxTime)
+	fmt.Printf("最小请求时长: %v\n", minTime)
+	fmt.Printf("成功的处理数: %d\n", successNum)
+	fmt.Printf("失败的请求数: %d\n", failureNum)
+	fmt.Printf("处理总时长:   %v\n", processingTime)
+
+	// 如果 runTime 为 0（还未完成或未传值时），就不显示处理用时
+	if runTime != 0 {
+		fmt.Printf("处理用时:     %v\n", runTime)
+	}
+
+	fmt.Printf("QPS:          %.2f\n", qps)
+	fmt.Println("----------------------")
 }
